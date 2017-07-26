@@ -1,0 +1,5 @@
+{
+  "listClientIPsToSyncWith" : ["192.168.1.11"],
+  "localIpAddressOfInterfaceToListen" : "192.168.1.10",
+  "useThisUdpPortForNetworkCommunication" : 46994
+}
