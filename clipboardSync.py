@@ -1,7 +1,7 @@
 """
 author: Volker Lehmann
-version: 0.1
-last modified: 2017-07-26
+version: 0.1@work
+last modified: 2017-08-10
 """
 
 import logging #for logging
@@ -115,13 +115,17 @@ class ClipboardSync:
           self.__objReceiverSocket.bind((sInputNetworkInterface, self.__nPort))
         else:
           self.__objReceiverSocket.bind((str(socket.INADDR_ANY), self.__nPort))
-      except Exception is ex:
+      except Exception as ex:
         self.__logger.error("could not create receiver socket", exc_info = ex)
         self.__objReceiverSocket = None
     #
-    objCurrentThread = threading.currentThread()
-    while getattr(objCurrentThread, "do_run", True):
-      self.__receiveData()
+    # start listener thread, if we were able to create a listening socket
+    if self.__objReceiverSocket is not None:
+      objCurrentThread = threading.currentThread()
+      while getattr(objCurrentThread, "do_run", True):
+        self.__receiveData()
+    else:
+      self.__logger.error("will not start receiver thread, because could not open listener socket")
   
   def __receiveData(self):
     if self.__objReceiverSocket is not None:
@@ -140,7 +144,7 @@ class ClipboardSync:
       except Exception as ex:
         self.__logger.error("could not receive data from socket", exc_info = ex)
     else:
-      self.__logger.warning("could not receive data, because not receiver socket instance is not available")
+      self.__logger.warning("could not receive data, because no receiver socket instance is available")
       #  
     #
 
@@ -191,7 +195,7 @@ if __name__ == "__main__":
         #check if clipboard content has changed
         sCurrentClipboardContent = pyperclip.paste()
         if (sCurrentClipboardContent != sLastClipboardContent):
-          __logger.info("clipboard content has changed locally, notifying know clients ...")
+          __logger.info("clipboard content has changed locally, notifying known client(s) ...")
           objClipboardSync.updateClients(sCurrentClipboardContent)
           sLastClipboardContent = sCurrentClipboardContent
       time.sleep(0.7)
